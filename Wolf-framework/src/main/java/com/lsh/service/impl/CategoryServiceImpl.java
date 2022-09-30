@@ -35,13 +35,18 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Autowired
     private ArticleMapper articleMapper;
 
+    /**
+     * 分类文章的查询
+     *
+     * @return
+     */
     @Override
     public ResponseResult getCategoryList() {
 
         //查询文章表，状态为正常  select distinct category_id from sg_article where status = 0
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getStatus, SystemConstants.ARTICLE_STATUS_NORMAL);
-//        List<Article> articleList = articleService.list(queryWrapper);
+        //List<Article> articleList = articleService.list(queryWrapper);
         List<Article> articleList = articleMapper.selectList(queryWrapper);
         //获取文章的分类id并去重  set不可重复  通过stream流对获取到的正常文章列表 取出其分类id 并用Set收集
         Set<Long> categoryIds = articleList.stream().map(Article::getCategoryId).collect(Collectors.toSet());
