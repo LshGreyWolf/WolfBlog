@@ -17,6 +17,11 @@ public class SystemConstants {
      * 文章分类为禁用状态
      */
     public static final int CATEGORY_STATUS_DRAFT = 1;
+    /**
+     * 友链
+     */
+    public static final int LINK_STATUS_DRAFT = 1;
+    public static final int LINK_STATUS_NORMAL = 0;
 
 
 }
