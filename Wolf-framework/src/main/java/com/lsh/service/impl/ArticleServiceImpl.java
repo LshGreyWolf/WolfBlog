@@ -28,6 +28,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         //必须是正式文章，不是草稿   按照浏览量排序，显示前十条
         queryWrapper.eq(Article::getStatus, SystemConstants.ARTICLE_STATUS_NORMAL);
+        //筛选前十条
         Page<Article> page = new Page<>(1, 10);
         queryWrapper.orderByDesc(Article::getViewCount);
         Page<Article> articlePage = articleMapper.selectPage(page, queryWrapper);

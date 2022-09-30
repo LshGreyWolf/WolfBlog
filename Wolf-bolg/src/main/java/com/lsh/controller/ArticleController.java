@@ -17,8 +17,7 @@ public class ArticleController {
     private ArticleService articleService;
    @GetMapping("/hotArticleList")
     public ResponseResult hotArticleList(){
-
-
+        //get请求，且不带任何参数
        return articleService.hotArticleList();
     }
 }
