@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lsh.Constants.SystemConstants;
 import com.lsh.domain.ResponseResult;
 import com.lsh.domain.entity.Category;
+import com.lsh.domain.vo.ArticleDetailVo;
 import com.lsh.domain.vo.ArticleListVo;
 import com.lsh.domain.vo.HotArticleVo;
 import com.lsh.domain.vo.PageVo;
@@ -95,5 +96,26 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         List<ArticleListVo> articleListVos = BeanCopyUtils.copyBeanList(articles, ArticleListVo.class);
         PageVo pageVo = new PageVo(articleListVos, articlePage.getTotal());
         return ResponseResult.okResult(pageVo);
+    }
+
+    /**
+     * 获取文章详情
+     * @return
+     */
+    @Override
+    public ResponseResult getArticleDetail(Long id ) {
+        //根据id查询文章
+        Article article = articleMapper.selectById(id);
+        //转为VO    由于查出的文章只有分类id没有分类名字，但是articleDetailVo中有分类名字这个字段  所以需要查询分类名称
+        ArticleDetailVo articleDetailVo = BeanCopyUtils.copyBean(article, ArticleDetailVo.class);
+        //根据分类id查询分类名
+        Long categoryId = articleDetailVo.getCategoryId();
+        Category category = categoryMapper.selectById(categoryId);
+        String categoryName = category.getName();
+        if (category!=null){
+            articleDetailVo.setCategoryName(categoryName);
+        }
+        //封装响应返回
+        return ResponseResult.okResult(articleDetailVo);
     }
 }

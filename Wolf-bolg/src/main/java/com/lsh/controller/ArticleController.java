@@ -5,6 +5,7 @@ import com.lsh.domain.entity.Article;
 import com.lsh.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,23 +19,36 @@ public class ArticleController {
 
     /**
      * 热门文章列表查询
+     *
      * @return
      */
-   @GetMapping("/hotArticleList")
-    public ResponseResult hotArticleList(){
+    @GetMapping("/hotArticleList")
+    public ResponseResult hotArticleList() {
         //get请求，且不带任何参数
-       return articleService.hotArticleList();
+        return articleService.hotArticleList();
     }
 
     /**
      * 主页的文章分页查询
+     *
      * @param pageNum
      * @param pageSize
      * @param categoryId
      * @return
      */
     @GetMapping("/articleList")
-    public ResponseResult articleList(Integer pageNum,Integer pageSize,Long categoryId){
-       return articleService.articleList(pageNum,pageSize,categoryId);
+    public ResponseResult articleList(Integer pageNum, Integer pageSize, Long categoryId) {
+        return articleService.articleList(pageNum, pageSize, categoryId);
+    }
+
+    /**
+     * 查询文章详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public ResponseResult getArticleDetail(@PathVariable("id") Long id) {
+
+        return articleService.getArticleDetail(id);
     }
 }
