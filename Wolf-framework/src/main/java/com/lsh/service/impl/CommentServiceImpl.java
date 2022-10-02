@@ -3,9 +3,9 @@ package com.lsh.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lsh.Constants.SystemConstants;
 import com.lsh.domain.ResponseResult;
 import com.lsh.domain.entity.Comment;
-import com.lsh.domain.entity.User;
 import com.lsh.domain.vo.CommentVo;
 import com.lsh.domain.vo.PageVo;
 import com.lsh.enums.AppHttpCodeEnum;
@@ -13,8 +13,6 @@ import com.lsh.exception.SystemException;
 import com.lsh.mapper.CommentMapper;
 import com.lsh.service.UserService;
 import com.lsh.utils.BeanCopyUtils;
-import com.lsh.utils.SecurityUtils;
-import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.lsh.service.CommentService;
@@ -36,14 +34,16 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     private UserService userService;
 
     @Override
-    public ResponseResult commentList(Long articleId, Integer pageNum, Integer pageSize) {
+    public ResponseResult commentList(String commentType, Long articleId, Integer pageNum, Integer pageSize) {
         //查询对应文章的根评论  root_id = -1
 
         //对文章id进行判断
         LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Comment::getArticleId, articleId);
+        queryWrapper.eq(SystemConstants.ARTICLE_COMMENT.equals(commentType),Comment::getArticleId, articleId);
         //根评论  root_id = -1
         queryWrapper.eq(Comment::getRootId, -1);
+        //评论类型
+        queryWrapper.eq(Comment::getType,commentType);
         //分页查询
         Page<Comment> page = new Page<>(pageNum, pageSize);
         Page<Comment> commentPage = commentMapper.selectPage(page, queryWrapper);
