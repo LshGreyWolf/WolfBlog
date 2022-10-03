@@ -31,13 +31,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Long userId = SecurityUtils.getUserId();
         //根据id查询用户信息
         LambdaQueryWrapper<User> qw = new LambdaQueryWrapper<>();
-        qw.eq(User::getId,userId);
+        qw.eq(User::getId, userId);
         User user = userService.getOne(qw);
         //封装成userInfoVo
         UserInfoVo userInfoVo = BeanCopyUtils.copyBean(user, UserInfoVo.class);
 
 
         return ResponseResult.okResult(userInfoVo);
+    }
+
+    @Override
+    public ResponseResult updateUserInfo(User user) {
+        updateById(user);
+        return ResponseResult.okResult();
     }
 }
 
