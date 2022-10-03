@@ -23,6 +23,7 @@ mybatis-plus:
       #自增 数据库主键自增
       id-type: auto
       table-prefix: sg_
+#文件上传
 oss:
  accessKey: "xK4duypDGA26sSsPAD_R4DrJAIWy3G7-5FXTKZbh"
  secretKey: "JGk5Y_LKNNy7PGL0pRXUgwHZcU_vW5jZhvLqBP9C"

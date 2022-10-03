@@ -16,6 +16,7 @@ import com.lsh.service.ArticleService;
 import com.lsh.domain.entity.Article;
 import com.lsh.service.CategoryService;
 import com.lsh.utils.BeanCopyUtils;
+import com.lsh.utils.RedisCache;
 import com.sun.corba.se.spi.orbutil.threadpool.WorkQueue;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Lazy
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private RedisCache redisCache;
 
     /**
      * 热门文章列表查询
@@ -71,6 +74,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      */
     @Override
     public ResponseResult articleList(Integer pageNum, Integer pageSize, Long categoryId) {
+
         //判断categoryId是否为null
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Objects.nonNull(categoryId) && categoryId > 0, Article::getCategoryId, categoryId);
@@ -95,6 +99,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         //封装查询结果   要使用两次vo 一次封装row的 一次封装 row 和 total
         List<ArticleListVo> articleListVos = BeanCopyUtils.copyBeanList(articles, ArticleListVo.class);
         PageVo pageVo = new PageVo(articleListVos, articlePage.getTotal());
+        //从redis中获取浏览量
+        for (ArticleListVo articleListVo: articleListVos){
+            Integer viewCount = redisCache.getCacheMapValue("article:viewCount", articleListVo.getId().toString());
+            articleListVo.setViewCount(viewCount.longValue());
+        }
+
         return ResponseResult.okResult(pageVo);
     }
 
@@ -106,6 +116,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     public ResponseResult getArticleDetail(Long id ) {
         //根据id查询文章
         Article article = articleMapper.selectById(id);
+        //从redis中获取浏览量
+        Integer viewCount = redisCache.getCacheMapValue("article:viewCount", id.toString());
+        article.setViewCount(viewCount.longValue());
         //转为VO    由于查出的文章只有分类id没有分类名字，但是articleDetailVo中有分类名字这个字段  所以需要查询分类名称
         ArticleDetailVo articleDetailVo = BeanCopyUtils.copyBean(article, ArticleDetailVo.class);
         //根据分类id查询分类名
@@ -117,5 +130,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
         //封装响应返回
         return ResponseResult.okResult(articleDetailVo);
+    }
+
+    @Override
+    public ResponseResult updateViewCount(Long id) {
+        //更新redis中对应 id的浏览量
+        redisCache.incrementCacheMapValue("article:viewCount",id.toString(),1);
+
+        return null;
     }
 }
