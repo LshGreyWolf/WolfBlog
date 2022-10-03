@@ -31,4 +31,5 @@ public class SystemConstants {
      * 评论类型为：友链评论
      */
     public static final String LINK_COMMENT = "1";
+
 }

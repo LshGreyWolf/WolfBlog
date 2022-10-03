@@ -12,7 +12,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SystemException.class)
     public ResponseResult systemException(SystemException e){
         //打印异常信息
-        log.error("出现了异常! {}",e);
+        log.error("出现了异常!{}",e);
         //从异常对象中获取提示信息，封装返回
         return ResponseResult.errorResult(e.getCode(),e.getMsg());
 
