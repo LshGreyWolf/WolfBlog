@@ -1,5 +1,6 @@
 package com.lsh.controller;
 
+import com.lsh.annotation.SystemLog;
 import com.lsh.domain.ResponseResult;
 import com.lsh.domain.entity.User;
 import com.lsh.service.UserService;
@@ -20,6 +21,7 @@ public class UserController {
 
 
     @PutMapping("/userInfo")
+    @SystemLog(businessName = "更新用户信息")
     public ResponseResult updateUserInfo(@RequestBody User user){
 
         return userService.updateUserInfo(user);
