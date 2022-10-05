@@ -9,6 +9,7 @@ import com.lsh.service.LoginService;
 import com.lsh.utils.BeanCopyUtils;
 import com.lsh.utils.JwtUtil;
 import com.lsh.utils.RedisCache;
+import com.lsh.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,12 +18,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Objects;
+
 @Service
 public class LoginServiceImpl implements LoginService {
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
     private RedisCache redisCache;
+
     @Override
     public ResponseResult login(User user) {
         UsernamePasswordAuthenticationToken authenticationToken =
@@ -32,7 +35,7 @@ public class LoginServiceImpl implements LoginService {
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
 
         //判断是否认证通过
-        if (Objects.isNull(authenticate)){
+        if (Objects.isNull(authenticate)) {
             throw new RuntimeException("用户名或者密码错误");
         }
         //获取userId生成token
@@ -41,10 +44,18 @@ public class LoginServiceImpl implements LoginService {
         //token就是jwt
         String jwt = JwtUtil.createJWT(userId);
         //将用户信息存入redis  将loginUser存入redis中，因为其可里面可包含权限信息
-        redisCache.setCacheObject("login:"+userId,loginUser);
+        redisCache.setCacheObject("login:" + userId, loginUser);
         //把token封装  查看响应格式，只响应一个token，不用封装成vo了
         HashMap<String, String> map = new HashMap<>();
-        map.put("token",jwt);
+        map.put("token", jwt);
         return ResponseResult.okResult(map);
+    }
+
+    @Override
+    public ResponseResult logout() {
+        Long userId = SecurityUtils.getUserId();
+        //删除缓存中的token
+        redisCache.deleteObject("login:" + userId);
+        return ResponseResult.okResult();
     }
 }

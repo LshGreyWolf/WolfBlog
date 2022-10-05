@@ -76,4 +76,9 @@ public class loginController {
         //封装返回
         return ResponseResult.okResult(routersVo);
     }
+    @PostMapping("/user/logout")
+    public ResponseResult logout(){
+
+        return loginService.logout();
+    }
 }
