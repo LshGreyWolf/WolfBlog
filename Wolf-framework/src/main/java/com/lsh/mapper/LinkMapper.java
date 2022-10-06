@@ -1,6 +1,7 @@
 package com.lsh.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.lsh.domain.ResponseResult;
 import com.lsh.domain.entity.Link;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -13,6 +14,7 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface LinkMapper extends BaseMapper<Link> {
+
 
 }
 

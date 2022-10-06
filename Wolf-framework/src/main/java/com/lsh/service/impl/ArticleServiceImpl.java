@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lsh.Constants.SystemConstants;
 import com.lsh.domain.ResponseResult;
+import com.lsh.domain.dto.AddArticleDto;
+import com.lsh.domain.dto.ArticleListDto;
+import com.lsh.domain.entity.ArticleTag;
 import com.lsh.domain.entity.Category;
 import com.lsh.domain.vo.ArticleDetailVo;
 import com.lsh.domain.vo.ArticleListVo;
@@ -14,6 +17,7 @@ import com.lsh.mapper.ArticleMapper;
 import com.lsh.mapper.CategoryMapper;
 import com.lsh.service.ArticleService;
 import com.lsh.domain.entity.Article;
+import com.lsh.service.ArticleTagService;
 import com.lsh.service.CategoryService;
 import com.lsh.utils.BeanCopyUtils;
 import com.lsh.utils.RedisCache;
@@ -22,6 +26,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -139,4 +145,43 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         return null;
     }
+
+    @Override
+    public ResponseResult pageArticleList(Integer pageNum, Integer pageSize, ArticleListDto articleListDto) {
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StringUtils.hasText(articleListDto.getTitle()),Article::getTitle,articleListDto.getTitle());
+        queryWrapper.eq(StringUtils.hasText(articleListDto.getSummary()),Article::getTitle,articleListDto.getSummary());
+        Page<Article> articlePage = new Page<>(pageNum,pageSize);
+        queryWrapper.like(StringUtils.hasText(articleListDto.getTitle()),Article::getTitle, articleListDto.getTitle())
+                .or()
+                .like(StringUtils.hasText(articleListDto.getSummary()), Article::getSummary, articleListDto.getSummary());
+        queryWrapper.orderByDesc(Article::getCreateTime);
+        Page<Article> page = articleMapper.selectPage(articlePage, queryWrapper);
+        List<Article> records = page.getRecords();
+        List<ArticleListVo> articleDetailVos = BeanCopyUtils.copyBeanList(records, ArticleListVo.class);
+        PageVo pageVo = new PageVo();
+        pageVo.setRows(articleDetailVos);
+        pageVo.setTotal(page.getTotal());
+        return ResponseResult.okResult(pageVo);
+    }
+
+    @Autowired
+    private ArticleTagService articleTagService;
+    @Override
+    @Transactional
+    public ResponseResult add(AddArticleDto addArticleDto) {
+
+        Article article = BeanCopyUtils.copyBean(addArticleDto, Article.class);
+        //先把文章有的字段插到article表中
+        articleMapper.insert(article);
+        //由于article表中没有tag这个字段，但是在新增博文的时候，有标签的这个字段，且博文是多对多的关系
+        //从标签跟博文关联表中取出tag 可以有多个  所以是List
+        List<ArticleTag> articleTags = addArticleDto.getTags().stream().map(tagId -> new ArticleTag(article.getId(), tagId))
+                .collect(Collectors.toList());
+        //添加 博客和标签的关联   再将标签id插入到 关联表中
+        articleTagService.saveBatch(articleTags);
+        return ResponseResult.okResult();
+    }
+
+
 }

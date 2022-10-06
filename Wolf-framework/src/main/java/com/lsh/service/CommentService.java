@@ -2,6 +2,7 @@ package com.lsh.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lsh.domain.ResponseResult;
+import com.lsh.domain.dto.LinkListDto;
 import com.lsh.domain.entity.Comment;
 
 
@@ -16,5 +17,7 @@ public interface CommentService extends IService<Comment> {
     ResponseResult commentList(String commentType, Long articleId, Integer pageNum, Integer pageSize);
 
     ResponseResult addComment(Comment comment);
+
+
 }
 

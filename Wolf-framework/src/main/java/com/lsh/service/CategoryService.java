@@ -2,6 +2,7 @@ package com.lsh.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lsh.domain.ResponseResult;
+import com.lsh.domain.dto.CategoryListDto;
 import com.lsh.domain.entity.Category;
 
 
@@ -14,5 +15,9 @@ import com.lsh.domain.entity.Category;
 public interface CategoryService extends IService<Category> {
 
     ResponseResult getCategoryList();
+
+    ResponseResult listAllCategory();
+
+    ResponseResult listPageCategory(Integer pageNum, Integer pageSize, CategoryListDto categoryListDto);
 }
 

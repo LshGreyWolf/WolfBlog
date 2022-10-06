@@ -23,4 +23,6 @@ public class TestApplication {
         List<Menu> strings = menuMapper.listRouters();
         log.info("jiegou:{}", JSON.toJSONString(strings));
     }
+
+
 }

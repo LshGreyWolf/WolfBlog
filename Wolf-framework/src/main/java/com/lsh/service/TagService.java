@@ -1,7 +1,10 @@
 package com.lsh.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lsh.domain.ResponseResult;
+import com.lsh.domain.dto.TagListDto;
 import com.lsh.domain.entity.Tag;
+import com.lsh.domain.vo.TagPageVo;
 
 
 /**
@@ -12,5 +15,17 @@ import com.lsh.domain.entity.Tag;
  */
 public interface TagService extends IService<Tag> {
 
+
+    ResponseResult pageTagList(Integer pageNum, Integer pageSize, TagListDto tagListDto);
+
+    ResponseResult addTag(Tag tag);
+
+    ResponseResult deleteTag(Long id);
+
+    ResponseResult updateTag(Long id);
+
+    ResponseResult saveTag(Tag tag);
+
+    ResponseResult listAllTag();
 }
 

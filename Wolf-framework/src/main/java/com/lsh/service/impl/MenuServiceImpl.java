@@ -2,12 +2,16 @@ package com.lsh.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lsh.domain.ResponseResult;
 import com.lsh.domain.entity.Menu;
+import com.lsh.domain.vo.MenuListVo;
 import com.lsh.mapper.MenuMapper;
+import com.lsh.utils.BeanCopyUtils;
 import com.lsh.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.lsh.service.MenuService;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,15 +57,17 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
         } else {
             //如果不是，返回对应的menu
-             menuMapper.selectRouterMenuTreeByUserId(userId);
+            menuMapper.selectRouterMenuTreeByUserId(userId);
         }
         //构建tree  先找出第一层的菜单，然后找到他们的子菜单设置到children中
         List<Menu> menuTree = bulidMenuTree(menus, 0L);
         return menuTree;
     }
 
+
     /**
      * 构建树
+     *
      * @param menus
      * @param parentId
      * @return
@@ -74,8 +80,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return menuTree;
 
     }
+
     /**
      * 获取存入参数的 子Menu集合
+     *
      * @param menu
      * @param menus
      * @return
@@ -86,6 +94,30 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
                 .collect(Collectors.toList());
 
         return childrenList;
+    }
+
+    /**
+     * 菜单列表
+     *
+     * @param menu
+     * @return
+     */
+    @Override
+    public ResponseResult MenuList(Menu menu) {
+        LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StringUtils.hasText(menu.getStatus()), Menu::getStatus, menu.getStatus());
+        queryWrapper.orderByAsc(Menu::getParentId);
+        queryWrapper.orderByAsc(Menu::getOrderNum);
+        queryWrapper.like(Menu::getMenuName,"");
+        List<Menu> menus = menuMapper.selectList(queryWrapper);
+        List<MenuListVo> menuListVos = BeanCopyUtils.copyBeanList(menus, MenuListVo.class);
+        return ResponseResult.okResult(menuListVos);
+    }
+
+    @Override
+    public ResponseResult addMenu(Menu menu) {
+        menuMapper.insert(menu);
+        return ResponseResult.okResult();
     }
 
 }
