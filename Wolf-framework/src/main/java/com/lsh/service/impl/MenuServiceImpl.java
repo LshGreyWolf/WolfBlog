@@ -43,7 +43,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         }
         //不是超级管理员，返回应具有的权限
         //需要涉及到多表查询，
-        //先根据用户id查出用户的对应权限role  在根据role查询对应的菜单的perm 其中菜单的类型为C和F 逻辑删除为0的
+        //先根据用户id查出用户的对应权限role(user_role表)  在根据role查询对应的菜单的perm(role_menu表) 其中菜单的类型为C和F(menu表)
+        // 逻辑删除为0的 查询出perms这个字段
         return menuMapper.selectPermsByUserId(userId);
     }
 
@@ -52,7 +53,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         //判断是否为管理员
         List<Menu> menus = null;
         if (SecurityUtils.isAdmin()) {
-            //如果是返回所哟有符合要求的Mean
+            //如果是返回所哟有符合要求的Mean 只涉及到一张表 menu表
             menus = menuMapper.listRouters();
 
         } else {
@@ -102,22 +103,55 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      * @param menu
      * @return
      */
-    @Override
-    public ResponseResult MenuList(Menu menu) {
-        LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(StringUtils.hasText(menu.getStatus()), Menu::getStatus, menu.getStatus());
-        queryWrapper.orderByAsc(Menu::getParentId);
-        queryWrapper.orderByAsc(Menu::getOrderNum);
-        queryWrapper.like(Menu::getMenuName,"");
-        List<Menu> menus = menuMapper.selectList(queryWrapper);
-        List<MenuListVo> menuListVos = BeanCopyUtils.copyBeanList(menus, MenuListVo.class);
-        return ResponseResult.okResult(menuListVos);
-    }
+//    @Override
+//    public ResponseResult MenuList(Menu menu) {
+//        LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(StringUtils.hasText(menu.getStatus()), Menu::getStatus, menu.getStatus());
+//        queryWrapper.orderByAsc(Menu::getParentId);
+//        queryWrapper.orderByAsc(Menu::getOrderNum);
+//        queryWrapper.like(Menu::getMenuName,menu.getMenuName());
+//        List<Menu> menus = menuMapper.selectList(queryWrapper);
+//        List<MenuListVo> menuListVos = BeanCopyUtils.copyBeanList(menus, MenuListVo.class);
+//        return ResponseResult.okResult(menuListVos);
+//    }
 
     @Override
     public ResponseResult addMenu(Menu menu) {
         menuMapper.insert(menu);
         return ResponseResult.okResult();
+    }
+
+    /**
+     * 删除没有子菜单的菜单
+     */
+    @Autowired
+    private MenuService menuService;
+    @Override
+    public ResponseResult deleteMenu(Long menuId) {
+        //先根据id查出该菜单是否由父菜单
+        LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Menu::getParentId,menuId);
+        //如果有父菜单，则说明该菜单不能被删除
+        int count = menuService.count(queryWrapper);
+        //如果输入的menuid有对应的parentId则说明该menuid为父菜单 不能删除
+        boolean flag = count!=0;
+        if (flag){
+           return ResponseResult.errorResult(500,"存在子菜单，删除失败");
+        }
+        menuService.removeById(menuId);
+        return ResponseResult.okResult();
+    }
+
+    @Override
+    public List<Menu> selectMenuList(Menu menu) {
+        LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
+        //menuName模糊查询
+        queryWrapper.like(StringUtils.hasText(menu.getMenuName()),Menu::getMenuName,menu.getMenuName());
+        queryWrapper.eq(StringUtils.hasText(menu.getStatus()),Menu::getStatus,menu.getStatus());
+        //排序 parent_id和order_num
+        queryWrapper.orderByAsc(Menu::getParentId,Menu::getOrderNum);
+        List<Menu> menus = list(queryWrapper);;
+        return menus;
     }
 
 }

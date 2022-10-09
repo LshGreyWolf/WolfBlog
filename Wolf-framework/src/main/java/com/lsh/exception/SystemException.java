@@ -20,9 +20,11 @@ public class SystemException extends RuntimeException{
     }
 
     public SystemException(AppHttpCodeEnum httpCodeEnum) {
+        //最后输出的内容
         super(httpCodeEnum.getMsg());
+
         this.code = httpCodeEnum.getCode();
         this.msg = httpCodeEnum.getMsg();
     }
-    
+
 }

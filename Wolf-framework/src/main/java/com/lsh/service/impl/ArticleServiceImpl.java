@@ -88,7 +88,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         //按照isTop降序
         queryWrapper.eq(Article::getStatus, SystemConstants.ARTICLE_STATUS_NORMAL);
         queryWrapper.orderByDesc(Article::getIsTop);
-
+        //TODO
         Page<Article> page = new Page<>(pageNum, pageSize);
         Page<Article> articlePage = articleMapper.selectPage(page, queryWrapper);
         List<Article> articles = page.getRecords();
@@ -100,6 +100,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             String categoryName = category.getName();
             article.setCategoryName(categoryName);
             return article;
+
         }).collect(Collectors.toList());
 
         //封装查询结果   要使用两次vo 一次封装row的 一次封装 row 和 total
@@ -176,7 +177,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         articleMapper.insert(article);
         //由于article表中没有tag这个字段，但是在新增博文的时候，有标签的这个字段，且博文是多对多的关系
         //从标签跟博文关联表中取出tag 可以有多个  所以是List
-        List<ArticleTag> articleTags = addArticleDto.getTags().stream().map(tagId -> new ArticleTag(article.getId(), tagId))
+        List<ArticleTag> articleTags =
+                addArticleDto.getTags().stream().map(tagId -> new ArticleTag(article.getId(), tagId))
                 .collect(Collectors.toList());
         //添加 博客和标签的关联   再将标签id插入到 关联表中
         articleTagService.saveBatch(articleTags);

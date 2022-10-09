@@ -43,6 +43,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     /**
      * 分类文章的查询
+     * ①要求只展示有发布正式文章的分类 ②必须是正常状态的分类
      *
      * @return
      */
@@ -56,6 +57,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         List<Article> articleList = articleMapper.selectList(queryWrapper);
         //获取文章的分类id并去重  set不可重复  通过stream流对获取到的正常文章列表 取出其分类id 并用Set收集
         Set<Long> categoryIds = articleList.stream().map(Article::getCategoryId).collect(Collectors.toSet());
+
+
         //得到分类id的集合 分类的状态也为正常
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
         //select sg_category.id from sg_category where sg_category.status = 0
@@ -71,13 +74,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     /**
      * 查询所有的分类
+     *
      * @return
      */
     @Override
     public ResponseResult listAllCategory() {
 
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Category::getStatus,0);
+        queryWrapper.eq(Category::getStatus, 0);
         List<Category> categories = categoryMapper.selectList(queryWrapper);
         List<ListAllCategoryVo> listAllCategoryVos = BeanCopyUtils.copyBeanList(categories, ListAllCategoryVo.class);
         return ResponseResult.okResult(listAllCategoryVos);
@@ -88,15 +92,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         Category category = BeanCopyUtils.copyBean(categoryListDto, Category.class);
         Page<Category> categoryPage = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(StringUtils.hasText(category.getName()),Category::getName, category.getName());
-        queryWrapper.eq(Objects.nonNull(category.getStatus()),Category::getStatus, category.getStatus());
+        queryWrapper.like(StringUtils.hasText(category.getName()), Category::getName, category.getName());
+        queryWrapper.eq(Objects.nonNull(category.getStatus()), Category::getStatus, category.getStatus());
         Page<Category> page = categoryMapper.selectPage(categoryPage, queryWrapper);
         List<Category> records = page.getRecords();
         List<CategoryVo> categoryVos = BeanCopyUtils.copyBeanList(records, CategoryVo.class);
         PageVo pageVo = new PageVo();
         pageVo.setRows(categoryVos);
         pageVo.setTotal(page.getTotal());
-
         return ResponseResult.okResult(pageVo);
     }
 }

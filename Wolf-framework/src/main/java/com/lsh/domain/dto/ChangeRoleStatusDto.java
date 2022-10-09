@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CategoryListDto {
-    private Long id;
-    private String name;
+public class ChangeRoleStatusDto {
+    private Long roleId;
     private String status;
-    private String description;
 }

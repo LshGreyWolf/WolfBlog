@@ -2,7 +2,9 @@ package com.lsh.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lsh.domain.ResponseResult;
+import com.lsh.domain.dto.UserDto;
 import com.lsh.domain.entity.User;
+import com.lsh.domain.vo.SaveUserVo;
 
 
 /**
@@ -18,5 +20,17 @@ public interface UserService extends IService<User> {
     ResponseResult updateUserInfo(User user);
 
     ResponseResult register(User user);
+
+    ResponseResult userPage(Integer pageNum, Integer pageSize, User user);
+
+
+    ResponseResult addUser(UserDto userDto);
+
+    ResponseResult deleteUser(Long id);
+
+    ResponseResult getUser(Long id);
+
+
+    ResponseResult saveUser(SaveUserVo saveUserVo);
 }
 

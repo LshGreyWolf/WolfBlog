@@ -1,6 +1,7 @@
 package com.lsh.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lsh.domain.ResponseResult;
 import com.lsh.domain.entity.Role;
 
 import java.util.List;
@@ -15,5 +16,12 @@ import java.util.List;
 public interface RoleService extends IService<Role> {
 
     List<String> selectRoleKeyByUserId(Long userId);
+
+
+    ResponseResult rolePage(Integer pageNum, Integer pageSize, Role role);
+
+    ResponseResult changeStatus(Role role);
+
+    ResponseResult getRole(Long id);
 }
 

@@ -48,8 +48,7 @@ public class LoginServiceImpl implements LoginService {
         //把token封装  查看响应格式，只响应一个token，不用封装成vo了
         HashMap<String, String> map = new HashMap<>();
         map.put("token", jwt);
-        return ResponseResult.okResult(map);
-    }
+        return ResponseResult.okResult(map);}
 
     @Override
     public ResponseResult logout() {
